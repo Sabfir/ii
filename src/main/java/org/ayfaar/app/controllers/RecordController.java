@@ -7,12 +7,15 @@ import org.ayfaar.app.model.User;
 import org.ayfaar.app.services.moderation.Action;
 import org.ayfaar.app.services.moderation.ModerationService;
 import org.ayfaar.app.services.moderation.UserRole;
+import org.ayfaar.app.services.record.RecordHelper;
 import org.ayfaar.app.services.topics.TopicProvider;
 import org.ayfaar.app.services.topics.TopicService;
 import org.ayfaar.app.utils.Transliterator;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,12 +36,14 @@ public class RecordController {
     private final TopicService topicService;
     private final ModerationService moderationService;
     private final RecordDao recordDao;
+    private final RecordHelper recordHelper;
 
     @Inject
-    public RecordController(RecordDao recordDao, TopicService topicService, ModerationService moderationService) {
+    public RecordController(RecordDao recordDao, TopicService topicService, ModerationService moderationService, RecordHelper recordHelper) {
         this.recordDao = recordDao;
         this.topicService = topicService;
         this.moderationService = moderationService;
+        this.recordHelper = recordHelper;
     }
 
     @RequestMapping()
@@ -96,5 +101,17 @@ public class RecordController {
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + record.getCode() + " " + name + ".mp3\"");
 
         return "redirect:" + url;
+    }
+
+    @RequestMapping(value = "duration/set", method = RequestMethod.PUT)
+    public ResponseEntity setDuration() {
+        recordHelper.setRecordsDuration();
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "duration/reload", method = RequestMethod.PUT)
+    public ResponseEntity reloadDuration() {
+        recordHelper.reloadRecordsDuration();
+        return new ResponseEntity(HttpStatus.OK);
     }
 }

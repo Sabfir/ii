@@ -54,7 +54,7 @@ public class AudioUtils {
 			if (file.delete()) {
 				log.info("Deleted file: {}", filePath);
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.error("Can't copy from {} to {}", url, filePath, e);
 		}
 
@@ -71,8 +71,12 @@ public class AudioUtils {
 
 	public static int getMp3DurationFromUrl(String url) {
 		Metadata metadata = getMp3MetadataFromUrl(url);
-		if (metadata != null) {
-			return (int) Double.parseDouble(metadata.get("xmpDM:duration")) / 1000;
+		if (metadata != null && metadata.size() > 0) {
+			String durationVal = metadata.get("xmpDM:duration");
+			if (durationVal != null) {
+				return (int) Double.parseDouble(durationVal) / 1000;
+			}
+
 		}
 		return -1;
 	}
